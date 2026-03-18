@@ -7,8 +7,8 @@ export const UpdaterModal: React.FC = () => {
   const [status, setStatus] = useState<
     'checking' | 'available' | 'downloading' | 'downloaded' | 'error' | 'idle' | 'up-to-date'
   >('idle')
-  const [progress, setProgress] = useState(0)
   const [message, setMessage] = useState('')
+  const [releaseUrl, setReleaseUrl] = useState('')
 
   useEffect(() => {
     const unsubTrigger = window.updaterApi.triggerCheck(() => {
@@ -19,10 +19,16 @@ export const UpdaterModal: React.FC = () => {
       setMessage(msg)
     })
 
-    const unsubAvail = window.updaterApi.onAvailable(() => {
+    const unsubAvail = window.updaterApi.onAvailable((info: unknown) => {
+      const updateInfo = info as { version?: string; releaseUrl?: string }
       setStatus('available')
       setShow(true)
-      window.updaterApi.download()
+      if (updateInfo.releaseUrl) {
+        setReleaseUrl(updateInfo.releaseUrl)
+      }
+      if (updateInfo.version) {
+        setMessage(updateInfo.version)
+      }
     })
 
     const unsubNotAvail = window.updaterApi.onNotAvailable(() => {
@@ -40,11 +46,8 @@ export const UpdaterModal: React.FC = () => {
       setShow(true)
     })
 
-    const unsubProgress = window.updaterApi.onDownloadProgress((prog: unknown) => {
-      setStatus('downloading')
-      setShow(true)
-      const percent = (prog as { percent?: number }).percent || 0
-      setProgress(Math.round(percent))
+    const unsubProgress = window.updaterApi.onDownloadProgress(() => {
+      // no-op: we redirect to browser for download
     })
 
     const unsubDownloaded = window.updaterApi.onDownloaded(() => {
@@ -77,6 +80,13 @@ export const UpdaterModal: React.FC = () => {
             : status === 'up-to-date'
               ? t.updater.upToDate
               : ''
+
+  const handleDownload = (): void => {
+    if (releaseUrl) {
+      window.updaterApi.openReleaseUrl(releaseUrl)
+    }
+    setShow(false)
+  }
 
   return (
     <div
@@ -117,39 +127,16 @@ export const UpdaterModal: React.FC = () => {
           {title}
         </h2>
 
-        {status === 'downloading' && (
-          <div
-            style={{
-              width: '100%',
-              height: 6,
-              borderRadius: 3,
-              background: 'rgba(255,255,255,0.1)',
-              overflow: 'hidden',
-              marginBottom: 12
-            }}
-          >
-            <div
-              className="progress-bar"
-              style={{
-                width: `${progress}%`,
-                height: '100%',
-                borderRadius: 3,
-                background: 'var(--color-green)',
-                transition: 'width 0.3s ease'
-              }}
-            />
-          </div>
-        )}
-
-        {(status === 'downloading' || status === 'available') && (
+        {status === 'available' && message && (
           <p
             style={{
-              fontSize: 13,
-              color: 'var(--color-text-dim)',
-              marginBottom: 16
+              fontSize: 14,
+              color: 'var(--color-green)',
+              marginBottom: 16,
+              fontWeight: 600
             }}
           >
-            {t.updater.progress}: {progress}%
+            v{message}
           </p>
         )}
 
@@ -169,32 +156,60 @@ export const UpdaterModal: React.FC = () => {
         )}
 
         <div style={{ display: 'flex', gap: 12 }}>
-          {status === 'downloaded' ? (
-            <button
-              className="btn btn-green"
-              onClick={() => window.updaterApi.quitAndInstall()}
-              style={{
-                padding: '10px 24px',
-                borderRadius: 20,
-                fontSize: 14
-              }}
-            >
-              {t.updater.restartNow}
-            </button>
+          {status === 'available' ? (
+            <>
+              <button
+                className="btn btn-green"
+                onClick={handleDownload}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 20,
+                  fontSize: 14
+                }}
+              >
+                {t.updater.downloadNow}
+              </button>
+              <button
+                className="btn btn-outline"
+                onClick={() => setShow(false)}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 20,
+                  fontSize: 14
+                }}
+              >
+                {t.updater.later}
+              </button>
+            </>
           ) : (
             <>
-              {status === 'error' && (
-                <button
-                  className="btn btn-outline"
-                  onClick={() => setShow(false)}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: 20,
-                    fontSize: 14
-                  }}
-                >
-                  {t.updater.close}
-                </button>
+              {(status === 'error' || status === 'downloaded') && (
+                <>
+                  {releaseUrl && (
+                    <button
+                      className="btn btn-green"
+                      onClick={handleDownload}
+                      style={{
+                        padding: '10px 24px',
+                        borderRadius: 20,
+                        fontSize: 14
+                      }}
+                    >
+                      {t.updater.downloadNow}
+                    </button>
+                  )}
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => setShow(false)}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: 20,
+                      fontSize: 14
+                    }}
+                  >
+                    {t.updater.close}
+                  </button>
+                </>
               )}
             </>
           )}

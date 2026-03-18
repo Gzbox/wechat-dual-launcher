@@ -138,6 +138,8 @@ const zh = {
     updateError: '更新出错',
     progress: '进度',
     restartNow: '立刻重启更新',
+    downloadNow: '前往下载',
+    later: '稍后',
     close: '关闭',
     checkForUpdates: '检查更新',
     checking: '正在检查…',

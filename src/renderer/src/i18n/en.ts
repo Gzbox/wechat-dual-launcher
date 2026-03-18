@@ -140,6 +140,8 @@ const en: Locale = {
     updateError: 'Update Error',
     progress: 'Progress',
     restartNow: 'Restart & Install',
+    downloadNow: 'Download Now',
+    later: 'Later',
     close: 'Close',
     checkForUpdates: 'Check for Updates',
     checking: 'Checking…',

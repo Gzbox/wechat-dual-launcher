@@ -79,7 +79,8 @@ const updaterApi = {
   },
   check: (): Promise<void> => ipcRenderer.invoke('updater:check'),
   download: (): Promise<void> => ipcRenderer.invoke('updater:download'),
-  quitAndInstall: (): Promise<void> => ipcRenderer.invoke('updater:quitAndInstall')
+  quitAndInstall: (): Promise<void> => ipcRenderer.invoke('updater:quitAndInstall'),
+  openReleaseUrl: (url: string): Promise<void> => ipcRenderer.invoke('updater:openReleaseUrl', url)
 }
 
 if (process.contextIsolated) {

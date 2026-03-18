@@ -44,6 +44,7 @@ interface UpdaterAPI {
   check: () => Promise<void>
   download: () => Promise<void>
   quitAndInstall: () => Promise<void>
+  openReleaseUrl: (url: string) => Promise<void>
 }
 
 declare global {

@@ -1,5 +1,5 @@
-import { autoUpdater } from 'electron-updater'
-import { ipcMain, BrowserWindow } from 'electron'
+import { autoUpdater, type UpdateInfo } from 'electron-updater'
+import { ipcMain, BrowserWindow, shell } from 'electron'
 
 /**
  * Safely send an IPC message to the renderer.
@@ -17,15 +17,20 @@ export function setupUpdater(mainWindow: BrowserWindow): void {
   autoUpdater.logger = console
 
   // Disable auto-download so the renderer controls when downloading starts.
-  // This ensures the custom UpdaterModal UI is shown BEFORE the download begins.
   autoUpdater.autoDownload = false
+
+  // Do NOT auto-install on quit — we handle updates via browser download
+  // because unsigned macOS apps cannot use Squirrel.Mac's ShipIt installer.
+  autoUpdater.autoInstallOnAppQuit = false
 
   autoUpdater.on('checking-for-update', () => {
     safeSend(mainWindow, 'updater:message', 'Checking for update...')
   })
 
-  autoUpdater.on('update-available', (info) => {
-    safeSend(mainWindow, 'updater:available', info)
+  autoUpdater.on('update-available', (info: UpdateInfo) => {
+    // Send the version and release URL to the renderer
+    const releaseUrl = `https://github.com/Gzbox/wechat-dual-launcher/releases/tag/v${info.version}`
+    safeSend(mainWindow, 'updater:available', { ...info, releaseUrl })
   })
 
   autoUpdater.on('update-not-available', (info) => {
@@ -54,5 +59,10 @@ export function setupUpdater(mainWindow: BrowserWindow): void {
 
   ipcMain.handle('updater:quitAndInstall', () => {
     autoUpdater.quitAndInstall()
+  })
+
+  // Open external URL (for manual download fallback)
+  ipcMain.handle('updater:openReleaseUrl', (_event, url: string) => {
+    shell.openExternal(url)
   })
 }

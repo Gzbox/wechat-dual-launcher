@@ -24,7 +24,6 @@ mac:
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
   notarize: false
-  identity: null
   target:
     - target: dmg
       arch:
