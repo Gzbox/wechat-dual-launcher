@@ -20,6 +20,16 @@ export function Dashboard(): React.JSX.Element {
     path: string
   } | null>(null)
   const [showInfo, setShowInfo] = useState(false)
+  const [appVersion, setAppVersion] = useState('')
+  const [checking, setChecking] = useState(false)
+
+  // Fetch app version on mount
+  useEffect(() => {
+    window.api
+      .getVersion()
+      .then(setAppVersion)
+      .catch(() => {})
+  }, [])
 
   // Clamp selectedIndex when instances shrink (e.g. after delete)
   useEffect(() => {
@@ -232,7 +242,7 @@ export function Dashboard(): React.JSX.Element {
         </div>
 
         {/* Create button */}
-        <div className="no-drag" style={{ padding: '0 24px 32px' }}>
+        <div className="no-drag" style={{ padding: '0 24px 16px' }}>
           <button
             className="hover-card"
             onClick={() => setShowCreate(!showCreate)}
@@ -253,6 +263,63 @@ export function Dashboard(): React.JSX.Element {
             }}
           >
             {showCreate ? t.actions.cancel : `+ ${t.actions.create}`}
+          </button>
+        </div>
+
+        {/* Version footer */}
+        <div
+          className="no-drag"
+          style={{
+            padding: '12px 24px 20px',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
+          <span
+            style={{
+              fontSize: 11,
+              color: 'var(--color-sidebar-text-dim)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.3px'
+            }}
+          >
+            v{appVersion}
+          </span>
+          <button
+            onClick={async () => {
+              if (checking) return
+              setChecking(true)
+              try {
+                await window.updaterApi.check()
+              } catch {
+                // handled by UpdaterModal
+              } finally {
+                setTimeout(() => setChecking(false), 3000)
+              }
+            }}
+            disabled={checking}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: checking ? 'var(--color-sidebar-text-dim)' : 'var(--color-green)',
+              fontSize: 11,
+              cursor: checking ? 'default' : 'pointer',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 500,
+              padding: '2px 0',
+              opacity: checking ? 0.6 : 0.8,
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (!checking) e.currentTarget.style.opacity = '1'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = checking ? '0.6' : '0.8'
+            }}
+          >
+            {checking ? t.updater.checking : t.updater.checkForUpdates}
           </button>
         </div>
       </div>

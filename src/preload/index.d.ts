@@ -29,6 +29,7 @@ interface WeChatAPI {
   deleteInstance: (path: string) => Promise<void>
   updateInstance: (path: string) => Promise<void>
   checkRunning: (path: string) => Promise<boolean>
+  getVersion: () => Promise<string>
   onProgress: (callback: (event: ProgressEvent) => void) => () => void
 }
 

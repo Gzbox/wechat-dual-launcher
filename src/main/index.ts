@@ -83,6 +83,10 @@ function registerIpcHandlers(): void {
   ipcMain.handle('wechat:checkRunning', async (_event, appPath: string) => {
     return checkRunning(appPath)
   })
+
+  ipcMain.handle('app:getVersion', () => {
+    return app.getVersion()
+  })
 }
 
 // ── App Lifecycle ──────────────────────────────────────

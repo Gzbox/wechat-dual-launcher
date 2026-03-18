@@ -31,6 +31,7 @@ const api = {
   deleteInstance: (path: string): Promise<void> => ipcRenderer.invoke('wechat:delete', path),
   updateInstance: (path: string): Promise<void> => ipcRenderer.invoke('wechat:update', path),
   checkRunning: (path: string): Promise<boolean> => ipcRenderer.invoke('wechat:checkRunning', path),
+  getVersion: (): Promise<string> => ipcRenderer.invoke('app:getVersion'),
   onProgress: (callback: (event: ProgressEvent) => void): (() => void) => {
     const handler = (_: Electron.IpcRendererEvent, event: ProgressEvent): void => {
       callback(event)

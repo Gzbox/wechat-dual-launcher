@@ -5,7 +5,7 @@ export const UpdaterModal: React.FC = () => {
   const { t } = useI18n()
   const [show, setShow] = useState(false)
   const [status, setStatus] = useState<
-    'checking' | 'available' | 'downloading' | 'downloaded' | 'error' | 'idle'
+    'checking' | 'available' | 'downloading' | 'downloaded' | 'error' | 'idle' | 'up-to-date'
   >('idle')
   const [progress, setProgress] = useState(0)
   const [message, setMessage] = useState('')
@@ -26,7 +26,12 @@ export const UpdaterModal: React.FC = () => {
     })
 
     const unsubNotAvail = window.updaterApi.onNotAvailable(() => {
-      setStatus('idle')
+      setStatus('up-to-date')
+      setShow(true)
+      setTimeout(() => {
+        setShow(false)
+        setStatus('idle')
+      }, 2500)
     })
 
     const unsubErr = window.updaterApi.onError((err) => {
@@ -69,7 +74,9 @@ export const UpdaterModal: React.FC = () => {
           ? t.updater.downloaded
           : status === 'error'
             ? t.updater.updateError
-            : ''
+            : status === 'up-to-date'
+              ? t.updater.upToDate
+              : ''
 
   return (
     <div
