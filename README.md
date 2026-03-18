@@ -1,127 +1,282 @@
-# WeChat Dual Launcher (微信双开助手)
+<div align="center">
+
+<img src="./build/icon.png" alt="WeChat Dual Logo" width="120">
+
+# WeChat Dual Launcher
+
+**在 macOS 上同时运行两个微信实例 / Run two WeChat instances simultaneously on macOS**
+
+[![Release](https://img.shields.io/github/v/release/Gzbox/wechat-dual-launcher?style=flat-square&color=blue)](https://github.com/Gzbox/wechat-dual-launcher/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](./LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey?style=flat-square&logo=apple)](https://github.com/Gzbox/wechat-dual-launcher)
+[![Electron](https://img.shields.io/badge/Electron-41-47848F?style=flat-square&logo=electron)](https://www.electronjs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/Gzbox/wechat-dual-launcher/pulls)
+
+[English](#-overview) · [简体中文](#-简介) · [Download](https://github.com/Gzbox/wechat-dual-launcher/releases) · [Report Bug](https://github.com/Gzbox/wechat-dual-launcher/issues)
+
+<br>
+
+<img src="./assets/screenshot.png" alt="WeChat Dual Launcher Screenshot 1" width="49%" />
+<img src="./assets/screenshot-1.png" alt="WeChat Dual Launcher Screenshot 2" width="49%" />
+
+</div>
+
+---
+
+## 📖 Overview
+
+**WeChat Dual Launcher** is a modern, fast, and secure macOS desktop application built to solve a common pain point: running multiple WeChat accounts at the same time. It creates an isolated copy of WeChat with a unique `Bundle ID`, letting macOS treat it as a completely separate application — no jailbreaking, no hacks, no modifications to your original WeChat.
+
+### ✨ Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| **One-Click Dual Instance** | Create and launch a second WeChat instance in seconds. |
+| **Automatic Detection** | Automatically locates your WeChat installation — zero configuration needed. |
+| **Safe & Non-Destructive** | Your primary `WeChat.app` is never modified. The clone is a separate copy. |
+| **Sync Updates** | When WeChat updates, refresh your clone with one click to stay current. |
+| **Clean Uninstall** | Completely removes the cloned app and its sandbox data when you no longer need it. |
+| **Internationalization** | Full English & Simplified Chinese UI with auto-detection. |
+| **Auto Updater** | Built-in update mechanism to keep the launcher itself up-to-date. |
+| **CI/CD** | Automated builds and GitHub Releases via GitHub Actions. |
+
+---
+
+## 🔧 Requirements
+
+| Requirement | Details |
+| :--- | :--- |
+| **Operating System** | macOS 10.15 (Catalina) or later |
+| **WeChat** | Official WeChat for Mac installed in `/Applications/WeChat.app` |
+| **Architecture** | Apple Silicon (M1/M2/M3/M4) and Intel (x86_64) |
+
+---
+
+## 🚀 Quick Start
+
+### Download Pre-built Release
+
+Head to the [**Releases**](https://github.com/Gzbox/wechat-dual-launcher/releases) page, download the latest `.dmg`, open it, and drag **WeChat Dual** into your Applications folder.
+
+### Build from Source
+
+> **Prerequisites**: [Node.js](https://nodejs.org/) >= 18 and npm >= 9.
+
+```bash
+# Clone the repository
+git clone https://github.com/Gzbox/wechat-dual-launcher.git
+cd wechat-dual-launcher
+
+# Install dependencies
+npm install
+
+# Start in development mode (with hot-reload)
+npm run dev
+
+# Build production DMG for macOS
+npm run build:mac
+```
+
+The compiled `.dmg` and `.zip` artifacts will be generated in the `dist/` directory.
+
+---
+
+## 🏗️ Architecture
+
+```
+wechat-dual-launcher/
+├── src/
+│   ├── main/               # Electron Main Process
+│   │   ├── index.ts         #   App lifecycle & IPC handler registration
+│   │   ├── wechat.ts        #   Core logic: detect / create / launch / update / delete
+│   │   └── updater.ts       #   Auto-update integration (electron-updater)
+│   ├── preload/             # Context Bridge (secure IPC)
+│   │   ├── index.ts         #   Exposes typed API to renderer
+│   │   └── index.d.ts       #   Type declarations
+│   └── renderer/            # Frontend (React 19)
+│       └── src/
+│           ├── components/  #   UI components (Dashboard, Dialogs, Modals)
+│           ├── hooks/       #   Custom React hooks
+│           ├── i18n/        #   Internationalization (en / zh)
+│           └── App.tsx      #   Root component
+├── build/                   # Build resources (icons, entitlements)
+├── .github/workflows/       # CI/CD (GitHub Actions)
+├── electron-builder.yml     # Packaging & distribution config
+└── electron.vite.config.ts  # Vite bundler config
+```
+
+### Tech Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| Framework | [Electron 41](https://www.electronjs.org/) |
+| Frontend | [React 19](https://react.dev/) + [TypeScript 5](https://www.typescriptlang.org/) |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
+| Build Tool | [Electron Vite 5](https://electron-vite.org/) |
+| Packaging | [electron-builder 26](https://www.electron.build/) |
+| Linting | [ESLint 9](https://eslint.org/) + [Prettier](https://prettier.io/) |
+
+### How It Works
+
+```
+┌──────────────────┐        IPC (invoke/handle)       ┌─────────────────────┐
+│   Renderer       │ ──────────────────────────────▶  │   Main Process      │
+│   (React UI)     │                                  │                     │
+│                  │  ◀────────── events ────────────  │   wechat.ts         │
+│   Dashboard      │       (progress, updater)        │    ├ detectWeChat()  │
+│   ConfirmDialog  │                                  │    ├ createInstance()│
+│   InfoModal      │                                  │    ├ launchInstance()│
+│   UpdaterModal   │                                  │    ├ updateInstance()│
+└──────────────────┘                                  │    └ deleteInstance()│
+        ▲                                             └─────────┬───────────┘
+        │                                                       │
+   Context Bridge                                     macOS system calls
+   (preload/index.ts)                                (cp, codesign, PlistBuddy)
+```
+
+1. **Detect** — Scans `/Applications` and `~/Applications` for `WeChat.app` by matching its `CFBundleIdentifier`.
+2. **Clone** — Copies the `.app` bundle via `/bin/cp -R`, modifies `CFBundleIdentifier` and `CFBundleName` via `PlistBuddy`, then re-signs with `codesign`.
+3. **Launch** — Spawns the cloned executable as a detached child process.
+4. **Update** — Deletes the old clone (preserving container/chat data), re-copies from the latest original, and re-applies the custom bundle ID.
+5. **Delete** — Removes the `.app` bundle and its sandbox containers.
+
+---
+
+## 📜 Available Scripts
+
+| Command | Description |
+| :--- | :--- |
+| `npm run dev` | Start development server with hot-reload |
+| `npm run build` | Type-check and compile the project |
+| `npm run build:mac` | Build production macOS DMG + ZIP |
+| `npm run build:win` | Build production Windows installer |
+| `npm run build:linux` | Build production Linux package |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format code with Prettier |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run publish:mac` | Build and publish to GitHub Releases |
+| `npm run release:patch` | Bump patch version and push tag |
+| `npm run release:minor` | Bump minor version and push tag |
+| `npm run release:major` | Bump major version and push tag |
+
+---
+
+## 🔄 CI/CD
+
+This project uses **GitHub Actions** for automated releases. Push a version tag to trigger the pipeline:
+
+```bash
+# Bump version & create git tag automatically
+npm run release:patch    # 0.0.1 → 0.0.2
+
+# Or manually
+git tag v1.0.0
+git push --tags
+```
+
+The [release workflow](.github/workflows/release.yml) will:
+1. Run type checks
+2. Build the Electron app with `electron-vite`
+3. Package into `.dmg` and `.zip`
+4. Publish to **GitHub Releases** automatically
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. **Fork** the repository
+2. **Create** your feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+> Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
+
+---
+
+## ⚠️ Disclaimer
+
+This project is an independent, open-source tool for personal convenience. It is **not** affiliated with, endorsed by, or associated with Tencent or WeChat in any way. Use at your own discretion and responsibility.
+
+---
 
 <div align="center">
-  <img src="./assets/screenshot.png" alt="WeChat Dual Launcher Screenshot 1" width="49%" />
-  <img src="./assets/screenshot-1.png" alt="WeChat Dual Launcher Screenshot 2" width="49%" />
+
+Made with ❤️ by [dingzhen](https://github.com/Gzbox)
+
+If this project helped you, consider giving it a ⭐
+
 </div>
-[English](#english) | [简体中文](#简体中文)
 
 ---
 
-## English
+<details>
+<summary><strong>📖 简介（中文文档）</strong></summary>
 
-A modern, fast, and secure macOS desktop application that allows you to run two instances of WeChat simultaneously. Built with Electron, React, TypeScript, and Tailwind CSS.
+<br>
 
-### Features ✨
+## 📖 简介
 
-- **Dual Instance Launching**: Run a secondary instance of WeChat easily with a click.
-- **Mac-Native UI**: Beautiful interface that feels right at home on macOS.
-- **Internationalization (i18n)**: Full support for both English and Simplified Chinese.
-- **Automation**: Automatic detection of your local WeChat installation path.
-- **Safe & Clean**: Safely manages the WeChat copy without modifying your primary application files. Includes a tool to cleanly remove the cloned application when not needed.
-- **Updates**: Simple process to refresh your cloned instance when WeChat releases an update.
+**WeChat Dual Launcher（微信双开助手）** 是一款现代、快速、安全的 macOS 桌面应用，解决了一个常见痛点：**在同一台 Mac 上同时登录两个微信账号**。
 
-### Requirements 💻
+它通过创建一份拥有独立 `Bundle ID` 的微信副本，让 macOS 将其识别为一个完全独立的应用程序 —— 无需越狱，无需黑科技，不修改原始微信。
 
-- **OS**: macOS 10.15 or later
-- **WeChat**: The official WeChat application installed in your `/Applications` directory (`/Applications/WeChat.app`)
+### ✨ 核心功能
 
-### Tech Stack 🛠️
+| 功能 | 说明 |
+| :--- | :--- |
+| **一键双开** | 几秒内即可创建并启动第二个微信实例 |
+| **自动检测** | 自动定位微信安装路径，零配置 |
+| **安全无损** | 不修改原始 `WeChat.app`，副本完全独立 |
+| **一键同步** | 微信更新后，一键刷新副本即可同步最新版本 |
+| **彻底清理** | 不需要时可完整移除副本及其沙盒数据 |
+| **中英双语** | 完整的中英文界面，自动检测系统语言 |
+| **自动更新** | 内置更新机制，保持启动器本身为最新版本 |
+| **自动化发布** | 通过 GitHub Actions 自动构建和发布 |
 
-- **Framework**: [Electron](https://www.electronjs.org/)
-- **Frontend**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Build Tool**: [Electron Vite](https://electron-vite.org/)
+### 🔧 环境要求
 
-### Development Setup 🚀
+| 要求 | 详情 |
+| :--- | :--- |
+| **操作系统** | macOS 10.15 (Catalina) 或更高版本 |
+| **微信** | 安装在 `/Applications/WeChat.app` 的官方 Mac 版微信 |
+| **处理器架构** | Apple Silicon (M1/M2/M3/M4) 和 Intel (x86_64) |
 
-#### 1. Clone the repository
+### 🚀 快速开始
+
+前往 [**Releases**](https://github.com/Gzbox/wechat-dual-launcher/releases) 页面，下载最新的 `.dmg` 文件，打开后将 **WeChat Dual** 拖入 Applications 文件夹即可。
+
+#### 从源码构建
 
 ```bash
-git clone <your-repo-url>
+# 克隆仓库
+git clone https://github.com/Gzbox/wechat-dual-launcher.git
 cd wechat-dual-launcher
-```
 
-#### 2. Install Dependencies
-
-```bash
+# 安装依赖
 npm install
-```
 
-#### 3. Start Development Server
-
-```bash
+# 启动开发模式（支持热重载）
 npm run dev
-```
 
-#### 4. Build the Apple Silicon / Intel Mac App (DMG)
-
-```bash
+# 构建生产版 macOS DMG
 npm run build:mac
 ```
 
-The compiled macOS app (`.dmg` and `.app` formats) will be generated in the `dist` or `release` directory.
+### 📄 许可协议
 
-### License 📄
+本项目基于 **MIT License** 开源 —— 详见 [LICENSE](./LICENSE)。
 
-MIT License. See `LICENSE` for more information.
+### ⚠️ 免责声明
 
----
+本项目是独立的开源工具，仅供个人便利使用。**与腾讯或微信没有任何关联**，非官方产品。请自行承担使用风险。
 
-## 简体中文
-
-一款现代、快速且安全的 macOS 桌面应用程序，让您可以同时运行两个微信实例。基于 Electron、React、TypeScript 和 Tailwind CSS 构建。
-
-### 功能特点 ✨
-
-- **双开运行**：一键轻松运行第二个微信实例。
-- **原生应用体验**：美观的界面设计，完美融入 macOS 系统风格。
-- **国际化 (i18n)**：全面提供英文与简体中文支持。
-- **自动化**：自动检测您本地的微信安装路径。
-- **安全与纯净**：安全管理微信副本，不修改您的主应用程序文件。内置清理工具，在不需要时可彻底移除克隆的应用。
-- **便捷更新**：当微信发布更新时，提供简单的操作流程来刷新您的克隆实例。
-
-### 运行环境 💻
-
-- **系统**：macOS 10.15 或更高版本
-- **微信**：在 `/Applications` 目录下安装了官方微信应用 (`/Applications/WeChat.app`)
-
-### 技术栈 🛠️
-
-- **框架**：[Electron](https://www.electronjs.org/)
-- **前端页面**：[React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **样式**：[Tailwind CSS v4](https://tailwindcss.com/)
-- **构建工具**：[Electron Vite](https://electron-vite.org/)
-
-### 开发指南 🚀
-
-#### 1. 克隆仓库
-
-```bash
-git clone <您仓库的-url>
-cd wechat-dual-launcher
-```
-
-#### 2. 安装依赖
-
-```bash
-npm install
-```
-
-#### 3. 启动开发服务器
-
-```bash
-npm run dev
-```
-
-#### 4. 构建 macOS 应用 (DMG)
-
-```bash
-npm run build:mac
-```
-
-编译完成的 macOS 应用（`.dmg` 和 `.app` 格式）将生成在 `dist` 或 `release` 目录中。
-
-### 开源协议 📄
-
-使用 MIT 协议。查看 `LICENSE` 了解更多信息。
+</details>
