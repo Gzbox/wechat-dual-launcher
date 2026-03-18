@@ -1,0 +1,32 @@
+appId: com.wechatdual.app
+productName: WeChat Dual
+executableName: WeChatDual
+directories:
+  buildResources: build
+publish:
+  provider: github
+  owner: Gzbox
+  repo: wechat-dual-launcher
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - resources/**
+mac:
+  icon: build/icon.icns
+  category: public.app-category.utilities
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+  notarize: false
+  identity: null
+  target:
+    - dmg
+    - zip
+dmg:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
