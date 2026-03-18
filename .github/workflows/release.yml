@@ -16,6 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Delete existing release if any
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          gh release delete "$TAG_NAME" --yes --cleanup-tag=false 2>/dev/null || true
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
