@@ -324,7 +324,7 @@ npm run build:mac
 打开 **终端 (Terminal.app)**，运行以下命令即可解决：
 
 ```bash
-sudo xattr -r -d com.apple.quarantine /Applications/WeChat\ Dual.app
+sudo xattr -r -d com.apple.quarantine /Applications/WeChatDual.app
 ```
 
 然后重新打开应用即可正常使用。**只需执行一次。**
