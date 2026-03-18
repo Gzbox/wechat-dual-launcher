@@ -7,6 +7,7 @@ publish:
   provider: github
   owner: Gzbox
   repo: wechat-dual-launcher
+  releaseType: release
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -25,8 +26,14 @@ mac:
   notarize: false
   identity: null
   target:
-    - dmg
-    - zip
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+    - target: zip
+      arch:
+        - arm64
+        - x64
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 npmRebuild: false

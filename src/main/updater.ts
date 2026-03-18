@@ -16,6 +16,10 @@ function safeSend(window: BrowserWindow, channel: string, ...args: unknown[]): v
 export function setupUpdater(mainWindow: BrowserWindow): void {
   autoUpdater.logger = console
 
+  // Disable auto-download so the renderer controls when downloading starts.
+  // This ensures the custom UpdaterModal UI is shown BEFORE the download begins.
+  autoUpdater.autoDownload = false
+
   autoUpdater.on('checking-for-update', () => {
     safeSend(mainWindow, 'updater:message', 'Checking for update...')
   })
@@ -41,7 +45,7 @@ export function setupUpdater(mainWindow: BrowserWindow): void {
   })
 
   ipcMain.handle('updater:check', () => {
-    return autoUpdater.checkForUpdatesAndNotify()
+    return autoUpdater.checkForUpdates()
   })
 
   ipcMain.handle('updater:download', () => {
