@@ -29,26 +29,26 @@
 
 ### ✨ Key Features
 
-| Feature | Description |
-| :--- | :--- |
-| **One-Click Dual Instance** | Create and launch a second WeChat instance in seconds. |
-| **Automatic Detection** | Automatically locates your WeChat installation — zero configuration needed. |
-| **Safe & Non-Destructive** | Your primary `WeChat.app` is never modified. The clone is a separate copy. |
-| **Sync Updates** | When WeChat updates, refresh your clone with one click to stay current. |
-| **Clean Uninstall** | Completely removes the cloned app and its sandbox data when you no longer need it. |
-| **Internationalization** | Full English & Simplified Chinese UI with auto-detection. |
-| **Auto Updater** | Built-in update mechanism to keep the launcher itself up-to-date. |
-| **CI/CD** | Automated builds and GitHub Releases via GitHub Actions. |
+| Feature                     | Description                                                                        |
+| :-------------------------- | :--------------------------------------------------------------------------------- |
+| **One-Click Dual Instance** | Create and launch a second WeChat instance in seconds.                             |
+| **Automatic Detection**     | Automatically locates your WeChat installation — zero configuration needed.        |
+| **Safe & Non-Destructive**  | Your primary `WeChat.app` is never modified. The clone is a separate copy.         |
+| **Sync Updates**            | When WeChat updates, refresh your clone with one click to stay current.            |
+| **Clean Uninstall**         | Completely removes the cloned app and its sandbox data when you no longer need it. |
+| **Internationalization**    | Full English & Simplified Chinese UI with auto-detection.                          |
+| **Auto Updater**            | Built-in update mechanism to keep the launcher itself up-to-date.                  |
+| **CI/CD**                   | Automated builds and GitHub Releases via GitHub Actions.                           |
 
 ---
 
 ## 🔧 Requirements
 
-| Requirement | Details |
-| :--- | :--- |
-| **Operating System** | macOS 10.15 (Catalina) or later |
-| **WeChat** | Official WeChat for Mac installed in `/Applications/WeChat.app` |
-| **Architecture** | Apple Silicon (M1/M2/M3/M4) and Intel (x86_64) |
+| Requirement          | Details                                                         |
+| :------------------- | :-------------------------------------------------------------- |
+| **Operating System** | macOS 10.15 (Catalina) or later                                 |
+| **WeChat**           | Official WeChat for Mac installed in `/Applications/WeChat.app` |
+| **Architecture**     | Apple Silicon (M1/M2/M3/M4) and Intel (x86_64)                  |
 
 ---
 
@@ -81,6 +81,43 @@ The compiled `.dmg` and `.zip` artifacts will be generated in the `dist/` direct
 
 ---
 
+## ❗ Troubleshooting / 常见问题
+
+### 🚨 "WeChat Dual" is damaged and can't be opened / "已损坏，无法打开"
+
+<div align="center">
+  <img src="./assets/gatekeeper-error.png" alt="macOS Gatekeeper Error" width="300" />
+</div>
+
+<br>
+
+> **This is expected behavior!** Since this app is not signed with an Apple Developer certificate, macOS Gatekeeper will block it. This does **NOT** mean the app is actually damaged — it is a standard macOS security warning for unsigned applications.
+>
+> **这是正常现象！** 由于本应用没有 Apple 开发者证书签名，macOS 的 Gatekeeper 会阻止打开。这**并不意味着**应用真的已损坏 —— 这只是 macOS 对未签名应用的标准安全提示。
+
+#### ✅ Fix / 解决方法
+
+Open **Terminal.app** and run the following command:
+
+打开 **终端 (Terminal.app)**，运行以下命令：
+
+```bash
+sudo xattr -r -d com.apple.quarantine /Applications/WeChatDual.app
+```
+
+Then open the app again — it will launch normally. You only need to do this **once**.
+
+然后重新打开应用即可正常使用。此操作**只需执行一次**。
+
+> [!TIP]
+> **What does this command do?** / **这条命令做了什么？**
+>
+> It removes the macOS quarantine flag that is automatically added to files downloaded from the internet. This is safe and only affects this specific app.
+>
+> 它移除了 macOS 自动为从互联网下载的文件添加的隔离标记。此操作是安全的，且仅影响这一个应用。
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -107,14 +144,14 @@ wechat-dual-launcher/
 
 ### Tech Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| Framework | [Electron 41](https://www.electronjs.org/) |
-| Frontend | [React 19](https://react.dev/) + [TypeScript 5](https://www.typescriptlang.org/) |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
-| Build Tool | [Electron Vite 5](https://electron-vite.org/) |
-| Packaging | [electron-builder 26](https://www.electron.build/) |
-| Linting | [ESLint 9](https://eslint.org/) + [Prettier](https://prettier.io/) |
+| Layer      | Technology                                                                       |
+| :--------- | :------------------------------------------------------------------------------- |
+| Framework  | [Electron 41](https://www.electronjs.org/)                                       |
+| Frontend   | [React 19](https://react.dev/) + [TypeScript 5](https://www.typescriptlang.org/) |
+| Styling    | [Tailwind CSS v4](https://tailwindcss.com/)                                      |
+| Build Tool | [Electron Vite 5](https://electron-vite.org/)                                    |
+| Packaging  | [electron-builder 26](https://www.electron.build/)                               |
+| Linting    | [ESLint 9](https://eslint.org/) + [Prettier](https://prettier.io/)               |
 
 ### How It Works
 
@@ -144,20 +181,20 @@ wechat-dual-launcher/
 
 ## 📜 Available Scripts
 
-| Command | Description |
-| :--- | :--- |
-| `npm run dev` | Start development server with hot-reload |
-| `npm run build` | Type-check and compile the project |
-| `npm run build:mac` | Build production macOS DMG + ZIP |
-| `npm run build:win` | Build production Windows installer |
-| `npm run build:linux` | Build production Linux package |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
-| `npm run typecheck` | Run TypeScript type checking |
-| `npm run publish:mac` | Build and publish to GitHub Releases |
-| `npm run release:patch` | Bump patch version and push tag |
-| `npm run release:minor` | Bump minor version and push tag |
-| `npm run release:major` | Bump major version and push tag |
+| Command                 | Description                              |
+| :---------------------- | :--------------------------------------- |
+| `npm run dev`           | Start development server with hot-reload |
+| `npm run build`         | Type-check and compile the project       |
+| `npm run build:mac`     | Build production macOS DMG + ZIP         |
+| `npm run build:win`     | Build production Windows installer       |
+| `npm run build:linux`   | Build production Linux package           |
+| `npm run lint`          | Run ESLint                               |
+| `npm run format`        | Format code with Prettier                |
+| `npm run typecheck`     | Run TypeScript type checking             |
+| `npm run publish:mac`   | Build and publish to GitHub Releases     |
+| `npm run release:patch` | Bump patch version and push tag          |
+| `npm run release:minor` | Bump minor version and push tag          |
+| `npm run release:major` | Bump major version and push tag          |
 
 ---
 
@@ -175,6 +212,7 @@ git push --tags
 ```
 
 The [release workflow](.github/workflows/release.yml) will:
+
 1. Run type checks
 2. Build the Electron app with `electron-vite`
 3. Package into `.dmg` and `.zip`
@@ -231,24 +269,24 @@ If this project helped you, consider giving it a ⭐
 
 ### ✨ 核心功能
 
-| 功能 | 说明 |
-| :--- | :--- |
-| **一键双开** | 几秒内即可创建并启动第二个微信实例 |
-| **自动检测** | 自动定位微信安装路径，零配置 |
-| **安全无损** | 不修改原始 `WeChat.app`，副本完全独立 |
-| **一键同步** | 微信更新后，一键刷新副本即可同步最新版本 |
-| **彻底清理** | 不需要时可完整移除副本及其沙盒数据 |
-| **中英双语** | 完整的中英文界面，自动检测系统语言 |
-| **自动更新** | 内置更新机制，保持启动器本身为最新版本 |
-| **自动化发布** | 通过 GitHub Actions 自动构建和发布 |
+| 功能           | 说明                                     |
+| :------------- | :--------------------------------------- |
+| **一键双开**   | 几秒内即可创建并启动第二个微信实例       |
+| **自动检测**   | 自动定位微信安装路径，零配置             |
+| **安全无损**   | 不修改原始 `WeChat.app`，副本完全独立    |
+| **一键同步**   | 微信更新后，一键刷新副本即可同步最新版本 |
+| **彻底清理**   | 不需要时可完整移除副本及其沙盒数据       |
+| **中英双语**   | 完整的中英文界面，自动检测系统语言       |
+| **自动更新**   | 内置更新机制，保持启动器本身为最新版本   |
+| **自动化发布** | 通过 GitHub Actions 自动构建和发布       |
 
 ### 🔧 环境要求
 
-| 要求 | 详情 |
-| :--- | :--- |
-| **操作系统** | macOS 10.15 (Catalina) 或更高版本 |
-| **微信** | 安装在 `/Applications/WeChat.app` 的官方 Mac 版微信 |
-| **处理器架构** | Apple Silicon (M1/M2/M3/M4) 和 Intel (x86_64) |
+| 要求           | 详情                                                |
+| :------------- | :-------------------------------------------------- |
+| **操作系统**   | macOS 10.15 (Catalina) 或更高版本                   |
+| **微信**       | 安装在 `/Applications/WeChat.app` 的官方 Mac 版微信 |
+| **处理器架构** | Apple Silicon (M1/M2/M3/M4) 和 Intel (x86_64)       |
 
 ### 🚀 快速开始
 
@@ -270,6 +308,26 @@ npm run dev
 # 构建生产版 macOS DMG
 npm run build:mac
 ```
+
+### ❗ 常见问题
+
+#### 🚨 提示"已损坏，无法打开"
+
+<div align="center">
+  <img src="./assets/gatekeeper-error.png" alt="macOS Gatekeeper 报错" width="300" />
+</div>
+
+<br>
+
+> **这是正常现象！** 由于本应用没有 Apple 开发者证书签名，macOS 的 Gatekeeper 会阻止打开。这**不代表**应用真的已损坏。
+
+打开 **终端 (Terminal.app)**，运行以下命令即可解决：
+
+```bash
+sudo xattr -r -d com.apple.quarantine /Applications/WeChat\ Dual.app
+```
+
+然后重新打开应用即可正常使用。**只需执行一次。**
 
 ### 📄 许可协议
 
