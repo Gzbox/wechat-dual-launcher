@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { useI18n } from '../i18n'
 
 export const UpdaterModal: React.FC = () => {
+  const { t } = useI18n()
   const [show, setShow] = useState(false)
   const [status, setStatus] = useState<
     'checking' | 'available' | 'downloading' | 'downloaded' | 'error' | 'idle'
@@ -10,7 +12,6 @@ export const UpdaterModal: React.FC = () => {
 
   useEffect(() => {
     const unsubTrigger = window.updaterApi.triggerCheck(() => {
-      // Optional: Auto check triggered from main process
       window.updaterApi.check()
     })
 
@@ -21,7 +22,6 @@ export const UpdaterModal: React.FC = () => {
     const unsubAvail = window.updaterApi.onAvailable(() => {
       setStatus('available')
       setShow(true)
-      // Auto download
       window.updaterApi.download()
     })
 
@@ -60,49 +60,133 @@ export const UpdaterModal: React.FC = () => {
 
   if (!show) return null
 
+  const title =
+    status === 'available'
+      ? t.updater.newVersion
+      : status === 'downloading'
+        ? t.updater.downloading
+        : status === 'downloaded'
+          ? t.updater.downloaded
+          : status === 'error'
+            ? t.updater.updateError
+            : ''
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-800 text-white p-6 rounded-2xl shadow-xl w-80 flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-4">
-          {status === 'available' && '发现新版本 (New Version)'}
-          {status === 'downloading' && '下载中... (Downloading...)'}
-          {status === 'downloaded' && '下载完成 (Downloaded)'}
-          {status === 'error' && '更新出错 (Update Error)'}
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'oklch(0.06 0.01 260 / 0.75)',
+        backdropFilter: 'blur(6px)'
+      }}
+    >
+      <div
+        style={{
+          width: 320,
+          borderRadius: 16,
+          padding: 24,
+          background: 'oklch(0.20 0.014 260)',
+          border: '1px solid var(--color-border)',
+          boxShadow: '0 24px 64px oklch(0 0 0 / 0.6)',
+          animation: 'slideUpScale 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          display: 'flex',
+          flexDirection: 'column' as const,
+          alignItems: 'center'
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            marginBottom: 16,
+            fontFamily: 'var(--font-display)',
+            color: '#fff'
+          }}
+        >
+          {title}
         </h2>
 
         {status === 'downloading' && (
-          <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden mb-4">
+          <div
+            style={{
+              width: '100%',
+              height: 6,
+              borderRadius: 3,
+              background: 'rgba(255,255,255,0.1)',
+              overflow: 'hidden',
+              marginBottom: 12
+            }}
+          >
             <div
-              className="bg-blue-500 h-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
+              className="progress-bar"
+              style={{
+                width: `${progress}%`,
+                height: '100%',
+                borderRadius: 3,
+                background: 'var(--color-green)',
+                transition: 'width 0.3s ease'
+              }}
+            />
           </div>
         )}
 
         {(status === 'downloading' || status === 'available') && (
-          <p className="text-sm text-slate-400 mb-4">进度: {progress}%</p>
+          <p
+            style={{
+              fontSize: 13,
+              color: 'var(--color-text-dim)',
+              marginBottom: 16
+            }}
+          >
+            {t.updater.progress}: {progress}%
+          </p>
         )}
 
         {status === 'error' && (
-          <p className="text-sm text-red-400 mb-4 whitespace-pre-wrap break-words">{message}</p>
+          <p
+            style={{
+              fontSize: 13,
+              color: 'var(--color-danger)',
+              marginBottom: 16,
+              wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap',
+              textAlign: 'center'
+            }}
+          >
+            {message}
+          </p>
         )}
 
-        <div className="flex gap-4">
+        <div style={{ display: 'flex', gap: 12 }}>
           {status === 'downloaded' ? (
             <button
-              className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full font-medium hover:opacity-90 transition-opacity"
+              className="btn btn-green"
               onClick={() => window.updaterApi.quitAndInstall()}
+              style={{
+                padding: '10px 24px',
+                borderRadius: 20,
+                fontSize: 14
+              }}
             >
-              立刻重启更新
+              {t.updater.restartNow}
             </button>
           ) : (
             <>
               {status === 'error' && (
                 <button
-                  className="px-4 py-2 bg-slate-700 rounded-full hover:bg-slate-600"
+                  className="btn btn-outline"
                   onClick={() => setShow(false)}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: 20,
+                    fontSize: 14
+                  }}
                 >
-                  关闭
+                  {t.updater.close}
                 </button>
               )}
             </>

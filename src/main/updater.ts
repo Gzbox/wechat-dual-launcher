@@ -1,41 +1,51 @@
 import { autoUpdater } from 'electron-updater'
 import { ipcMain, BrowserWindow } from 'electron'
 
+/**
+ * Safely send an IPC message to the renderer.
+ * Guards against sending to a destroyed or closed window,
+ * which can happen if the user closes the app while an
+ * auto-update event is still in-flight.
+ */
+function safeSend(window: BrowserWindow, channel: string, ...args: unknown[]): void {
+  if (!window.isDestroyed()) {
+    window.webContents.send(channel, ...args)
+  }
+}
+
 export function setupUpdater(mainWindow: BrowserWindow): void {
-  // We can set logger if needed
   autoUpdater.logger = console
-  // autoUpdater.autoDownload = false // Set this if you want to prompt before downloading
 
   autoUpdater.on('checking-for-update', () => {
-    mainWindow.webContents.send('updater:message', 'Checking for update...')
+    safeSend(mainWindow, 'updater:message', 'Checking for update...')
   })
 
   autoUpdater.on('update-available', (info) => {
-    mainWindow.webContents.send('updater:available', info)
+    safeSend(mainWindow, 'updater:available', info)
   })
 
   autoUpdater.on('update-not-available', (info) => {
-    mainWindow.webContents.send('updater:not-available', info)
+    safeSend(mainWindow, 'updater:not-available', info)
   })
 
   autoUpdater.on('error', (err) => {
-    mainWindow.webContents.send('updater:error', err.message || err.toString())
+    safeSend(mainWindow, 'updater:error', err.message || err.toString())
   })
 
   autoUpdater.on('download-progress', (progressObj) => {
-    mainWindow.webContents.send('updater:download-progress', progressObj)
+    safeSend(mainWindow, 'updater:download-progress', progressObj)
   })
 
   autoUpdater.on('update-downloaded', (info) => {
-    mainWindow.webContents.send('updater:downloaded', info)
+    safeSend(mainWindow, 'updater:downloaded', info)
   })
 
   ipcMain.handle('updater:check', () => {
-    autoUpdater.checkForUpdatesAndNotify()
+    return autoUpdater.checkForUpdatesAndNotify()
   })
 
   ipcMain.handle('updater:download', () => {
-    autoUpdater.downloadUpdate()
+    return autoUpdater.downloadUpdate()
   })
 
   ipcMain.handle('updater:quitAndInstall', () => {

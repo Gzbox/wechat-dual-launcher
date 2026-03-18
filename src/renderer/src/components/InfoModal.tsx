@@ -225,26 +225,6 @@ export function InfoModal({ open, onClose }: InfoModalProps): React.JSX.Element 
           ))}
         </div>
       </div>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
-        
-        code {
-          background: rgba(255,255,255,0.08);
-          padding: 2px 5px;
-          border-radius: 4px;
-          font-family: var(--font-mono);
-          font-size: 0.85em;
-          color: rgba(255,255,255,0.85);
-          border: 1px solid rgba(255,255,255,0.04);
-        }
-      `
-        }}
-      />
     </div>
   )
 }

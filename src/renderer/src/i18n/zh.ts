@@ -130,6 +130,15 @@ const zh = {
         content: '前端采用自绘的 <code>Frameless Window</code> 架构。通过定制可拖拽安全区 (<code>-webkit-app-region: drag</code>) 重拾系统级窗口拖拽。UI 阴影、毛玻璃与微动画 (<code>Keyframes</code>) 深度利用 GPU 硬件加速，纯 CSS 呈现顺滑的“超原生级”响应。'
       }
     ]
+  },
+  updater: {
+    newVersion: '发现新版本',
+    downloading: '下载中...',
+    downloaded: '下载完成',
+    updateError: '更新出错',
+    progress: '进度',
+    restartNow: '立刻重启更新',
+    close: '关闭'
   }
 }
 

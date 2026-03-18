@@ -132,6 +132,15 @@ const en: Locale = {
         content: 'Frontend mounts a purely bespoke <code>Frameless Window</code> topology. We hijack window-draggable regions natively using tailored CSS boundaries (<code>-webkit-app-region: drag</code>). The visual stack—macOS-grade shadows, GPU-accelerated glassmorphism, and micro-keyframes—is fully delegated to hardware rendering pipelines, orchestrating an unequivocally “super-native” tactical response.'
       }
     ]
+  },
+  updater: {
+    newVersion: 'New Version Available',
+    downloading: 'Downloading...',
+    downloaded: 'Download Complete',
+    updateError: 'Update Error',
+    progress: 'Progress',
+    restartNow: 'Restart & Install',
+    close: 'Close'
   }
 }
 
