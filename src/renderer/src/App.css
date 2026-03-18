@@ -133,6 +133,10 @@ body {
   background: var(--color-content-bg);
 }
 
+button, input, textarea, select, a {
+  -webkit-app-region: no-drag;
+}
+
 .drag-region {
   -webkit-app-region: drag;
 }

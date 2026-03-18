@@ -23,6 +23,7 @@ export function ConfirmDialog({
 
   return (
     <div
+      className="no-drag"
       onClick={onCancel}
       style={{
         position: 'fixed',

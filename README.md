@@ -1,5 +1,9 @@
 # WeChat Dual Launcher (微信双开助手)
 
+<div align="center">
+  <img src="./assets/screenshot.png" alt="WeChat Dual Launcher Screenshot 1" width="49%" />
+  <img src="./assets/screenshot-1.png" alt="WeChat Dual Launcher Screenshot 2" width="49%" />
+</div>
 [English](#english) | [简体中文](#简体中文)
 
 ---
@@ -32,25 +36,30 @@ A modern, fast, and secure macOS desktop application that allows you to run two 
 ### Development Setup 🚀
 
 #### 1. Clone the repository
+
 ```bash
 git clone <your-repo-url>
 cd wechat-dual-launcher
 ```
 
 #### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 #### 3. Start Development Server
+
 ```bash
 npm run dev
 ```
 
 #### 4. Build the Apple Silicon / Intel Mac App (DMG)
+
 ```bash
 npm run build:mac
 ```
+
 The compiled macOS app (`.dmg` and `.app` formats) will be generated in the `dist` or `release` directory.
 
 ### License 📄
@@ -87,25 +96,30 @@ MIT License. See `LICENSE` for more information.
 ### 开发指南 🚀
 
 #### 1. 克隆仓库
+
 ```bash
 git clone <您仓库的-url>
 cd wechat-dual-launcher
 ```
 
 #### 2. 安装依赖
+
 ```bash
 npm install
 ```
 
 #### 3. 启动开发服务器
+
 ```bash
 npm run dev
 ```
 
 #### 4. 构建 macOS 应用 (DMG)
+
 ```bash
 npm run build:mac
 ```
+
 编译完成的 macOS 应用（`.dmg` 和 `.app` 格式）将生成在 `dist` 或 `release` 目录中。
 
 ### 开源协议 📄
