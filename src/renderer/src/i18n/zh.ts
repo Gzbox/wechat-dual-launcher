@@ -133,17 +133,14 @@ const zh = {
   },
   updater: {
     newVersion: '发现新版本',
-    downloading: '下载中...',
-    downloaded: '下载完成',
     updateError: '更新出错',
-    progress: '进度',
-    restartNow: '立刻重启更新',
-    downloadNow: '前往下载',
-    later: '稍后',
     close: '关闭',
     checkForUpdates: '检查更新',
     checking: '正在检查…',
-    upToDate: '已是最新版本'
+    upToDate: '已是最新版本',
+    downloadNow: '前往下载',
+    later: '稍后',
+    browserHint: '将在浏览器中打开下载页面，下载新版 DMG 替换安装即可。'
   }
 }
 

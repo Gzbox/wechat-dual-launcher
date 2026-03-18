@@ -135,17 +135,14 @@ const en: Locale = {
   },
   updater: {
     newVersion: 'New Version Available',
-    downloading: 'Downloading...',
-    downloaded: 'Download Complete',
     updateError: 'Update Error',
-    progress: 'Progress',
-    restartNow: 'Restart & Install',
-    downloadNow: 'Download Now',
-    later: 'Later',
     close: 'Close',
     checkForUpdates: 'Check for Updates',
     checking: 'Checking…',
-    upToDate: 'You are up to date'
+    upToDate: 'You are up to date',
+    downloadNow: 'Download Now',
+    later: 'Later',
+    browserHint: 'Opens the download page in your browser. Download the new DMG and replace the app.'
   }
 }
 

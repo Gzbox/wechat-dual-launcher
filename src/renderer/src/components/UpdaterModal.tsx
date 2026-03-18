@@ -5,10 +5,10 @@ export const UpdaterModal: React.FC = () => {
   const { t } = useI18n()
   const [show, setShow] = useState(false)
   const [status, setStatus] = useState<
-    'checking' | 'available' | 'downloading' | 'downloaded' | 'error' | 'idle' | 'up-to-date'
+    'available' | 'error' | 'idle' | 'up-to-date'
   >('idle')
   const [message, setMessage] = useState('')
-  const [releaseUrl, setReleaseUrl] = useState('')
+  const [newVersion, setNewVersion] = useState('')
 
   useEffect(() => {
     const unsubTrigger = window.updaterApi.triggerCheck(() => {
@@ -19,16 +19,11 @@ export const UpdaterModal: React.FC = () => {
       setMessage(msg)
     })
 
-    const unsubAvail = window.updaterApi.onAvailable((info: unknown) => {
-      const updateInfo = info as { version?: string; releaseUrl?: string }
+    const unsubAvail = window.updaterApi.onAvailable((info) => {
+      const version = (info as { version?: string }).version || ''
+      setNewVersion(version)
       setStatus('available')
       setShow(true)
-      if (updateInfo.releaseUrl) {
-        setReleaseUrl(updateInfo.releaseUrl)
-      }
-      if (updateInfo.version) {
-        setMessage(updateInfo.version)
-      }
     })
 
     const unsubNotAvail = window.updaterApi.onNotAvailable(() => {
@@ -46,23 +41,12 @@ export const UpdaterModal: React.FC = () => {
       setShow(true)
     })
 
-    const unsubProgress = window.updaterApi.onDownloadProgress(() => {
-      // no-op: we redirect to browser for download
-    })
-
-    const unsubDownloaded = window.updaterApi.onDownloaded(() => {
-      setStatus('downloaded')
-      setShow(true)
-    })
-
     return () => {
       unsubTrigger()
       unsubMsg()
       unsubAvail()
       unsubNotAvail()
       unsubErr()
-      unsubProgress()
-      unsubDownloaded()
     }
   }, [])
 
@@ -71,22 +55,11 @@ export const UpdaterModal: React.FC = () => {
   const title =
     status === 'available'
       ? t.updater.newVersion
-      : status === 'downloading'
-        ? t.updater.downloading
-        : status === 'downloaded'
-          ? t.updater.downloaded
-          : status === 'error'
-            ? t.updater.updateError
-            : status === 'up-to-date'
-              ? t.updater.upToDate
-              : ''
-
-  const handleDownload = (): void => {
-    if (releaseUrl) {
-      window.updaterApi.openReleaseUrl(releaseUrl)
-    }
-    setShow(false)
-  }
+      : status === 'error'
+        ? t.updater.updateError
+        : status === 'up-to-date'
+          ? t.updater.upToDate
+          : ''
 
   return (
     <div
@@ -119,7 +92,7 @@ export const UpdaterModal: React.FC = () => {
           style={{
             fontSize: 18,
             fontWeight: 700,
-            marginBottom: 16,
+            marginBottom: 8,
             fontFamily: 'var(--font-display)',
             color: '#fff'
           }}
@@ -127,7 +100,7 @@ export const UpdaterModal: React.FC = () => {
           {title}
         </h2>
 
-        {status === 'available' && message && (
+        {status === 'available' && newVersion && (
           <p
             style={{
               fontSize: 14,
@@ -136,7 +109,21 @@ export const UpdaterModal: React.FC = () => {
               fontWeight: 600
             }}
           >
-            v{message}
+            v{newVersion}
+          </p>
+        )}
+
+        {status === 'available' && (
+          <p
+            style={{
+              fontSize: 13,
+              color: 'var(--color-text-dim)',
+              marginBottom: 16,
+              textAlign: 'center',
+              lineHeight: 1.5
+            }}
+          >
+            {t.updater.browserHint}
           </p>
         )}
 
@@ -156,11 +143,15 @@ export const UpdaterModal: React.FC = () => {
         )}
 
         <div style={{ display: 'flex', gap: 12 }}>
-          {status === 'available' ? (
+          {status === 'available' && (
             <>
               <button
                 className="btn btn-green"
-                onClick={handleDownload}
+                onClick={() => {
+                  window.updaterApi.openReleasePage()
+                  setShow(false)
+                  setStatus('idle')
+                }}
                 style={{
                   padding: '10px 24px',
                   borderRadius: 20,
@@ -171,7 +162,10 @@ export const UpdaterModal: React.FC = () => {
               </button>
               <button
                 className="btn btn-outline"
-                onClick={() => setShow(false)}
+                onClick={() => {
+                  setShow(false)
+                  setStatus('idle')
+                }}
                 style={{
                   padding: '10px 20px',
                   borderRadius: 20,
@@ -181,37 +175,20 @@ export const UpdaterModal: React.FC = () => {
                 {t.updater.later}
               </button>
             </>
-          ) : (
-            <>
-              {(status === 'error' || status === 'downloaded') && (
-                <>
-                  {releaseUrl && (
-                    <button
-                      className="btn btn-green"
-                      onClick={handleDownload}
-                      style={{
-                        padding: '10px 24px',
-                        borderRadius: 20,
-                        fontSize: 14
-                      }}
-                    >
-                      {t.updater.downloadNow}
-                    </button>
-                  )}
-                  <button
-                    className="btn btn-outline"
-                    onClick={() => setShow(false)}
-                    style={{
-                      padding: '10px 20px',
-                      borderRadius: 20,
-                      fontSize: 14
-                    }}
-                  >
-                    {t.updater.close}
-                  </button>
-                </>
-              )}
-            </>
+          )}
+
+          {status === 'error' && (
+            <button
+              className="btn btn-outline"
+              onClick={() => setShow(false)}
+              style={{
+                padding: '10px 20px',
+                borderRadius: 20,
+                fontSize: 14
+              }}
+            >
+              {t.updater.close}
+            </button>
           )}
         </div>
       </div>

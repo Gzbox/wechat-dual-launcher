@@ -1,5 +1,7 @@
-import { autoUpdater, type UpdateInfo } from 'electron-updater'
+import { autoUpdater } from 'electron-updater'
 import { ipcMain, BrowserWindow, shell } from 'electron'
+
+const RELEASE_URL = 'https://github.com/Gzbox/wechat-dual-launcher/releases/latest'
 
 /**
  * Safely send an IPC message to the renderer.
@@ -16,21 +18,20 @@ function safeSend(window: BrowserWindow, channel: string, ...args: unknown[]): v
 export function setupUpdater(mainWindow: BrowserWindow): void {
   autoUpdater.logger = console
 
-  // Disable auto-download so the renderer controls when downloading starts.
+  // ── Key: disable auto-download ──
+  // On macOS without code-signing, Squirrel/ShipIt cannot validate
+  // downloaded updates (signature mismatch). Industry best practice
+  // for unsigned apps: detect new versions, then redirect users to
+  // GitHub Releases to manually download the new DMG.
   autoUpdater.autoDownload = false
-
-  // Do NOT auto-install on quit — we handle updates via browser download
-  // because unsigned macOS apps cannot use Squirrel.Mac's ShipIt installer.
   autoUpdater.autoInstallOnAppQuit = false
 
   autoUpdater.on('checking-for-update', () => {
     safeSend(mainWindow, 'updater:message', 'Checking for update...')
   })
 
-  autoUpdater.on('update-available', (info: UpdateInfo) => {
-    // Send the version and release URL to the renderer
-    const releaseUrl = `https://github.com/Gzbox/wechat-dual-launcher/releases/tag/v${info.version}`
-    safeSend(mainWindow, 'updater:available', { ...info, releaseUrl })
+  autoUpdater.on('update-available', (info) => {
+    safeSend(mainWindow, 'updater:available', info)
   })
 
   autoUpdater.on('update-not-available', (info) => {
@@ -41,28 +42,12 @@ export function setupUpdater(mainWindow: BrowserWindow): void {
     safeSend(mainWindow, 'updater:error', err.message || err.toString())
   })
 
-  autoUpdater.on('download-progress', (progressObj) => {
-    safeSend(mainWindow, 'updater:download-progress', progressObj)
-  })
-
-  autoUpdater.on('update-downloaded', (info) => {
-    safeSend(mainWindow, 'updater:downloaded', info)
-  })
-
   ipcMain.handle('updater:check', () => {
     return autoUpdater.checkForUpdates()
   })
 
-  ipcMain.handle('updater:download', () => {
-    return autoUpdater.downloadUpdate()
-  })
-
-  ipcMain.handle('updater:quitAndInstall', () => {
-    autoUpdater.quitAndInstall()
-  })
-
-  // Open external URL (for manual download fallback)
-  ipcMain.handle('updater:openReleaseUrl', (_event, url: string) => {
-    shell.openExternal(url)
+  // Open the GitHub Releases page in the user's default browser
+  ipcMain.handle('updater:openReleasePage', () => {
+    return shell.openExternal(RELEASE_URL)
   })
 }

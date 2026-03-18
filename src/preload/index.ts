@@ -62,25 +62,13 @@ const updaterApi = {
     ipcRenderer.on('updater:error', handler)
     return () => ipcRenderer.removeListener('updater:error', handler)
   },
-  onDownloadProgress: (callback: (progress: unknown) => void): (() => void) => {
-    const handler = (_: unknown, progress: unknown): void => callback(progress)
-    ipcRenderer.on('updater:download-progress', handler)
-    return () => ipcRenderer.removeListener('updater:download-progress', handler)
-  },
-  onDownloaded: (callback: (info: unknown) => void): (() => void) => {
-    const handler = (_: unknown, info: unknown): void => callback(info)
-    ipcRenderer.on('updater:downloaded', handler)
-    return () => ipcRenderer.removeListener('updater:downloaded', handler)
-  },
   triggerCheck: (callback: () => void): (() => void) => {
     const handler = (): void => callback()
     ipcRenderer.on('updater:trigger-check', handler)
     return () => ipcRenderer.removeListener('updater:trigger-check', handler)
   },
   check: (): Promise<void> => ipcRenderer.invoke('updater:check'),
-  download: (): Promise<void> => ipcRenderer.invoke('updater:download'),
-  quitAndInstall: (): Promise<void> => ipcRenderer.invoke('updater:quitAndInstall'),
-  openReleaseUrl: (url: string): Promise<void> => ipcRenderer.invoke('updater:openReleaseUrl', url)
+  openReleasePage: (): Promise<void> => ipcRenderer.invoke('updater:openReleasePage')
 }
 
 if (process.contextIsolated) {

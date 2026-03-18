@@ -38,13 +38,9 @@ interface UpdaterAPI {
   onAvailable: (callback: (info: unknown) => void) => () => void
   onNotAvailable: (callback: (info: unknown) => void) => () => void
   onError: (callback: (err: string) => void) => () => void
-  onDownloadProgress: (callback: (progress: unknown) => void) => () => void
-  onDownloaded: (callback: (info: unknown) => void) => () => void
   triggerCheck: (callback: () => void) => () => void
   check: () => Promise<void>
-  download: () => Promise<void>
-  quitAndInstall: () => Promise<void>
-  openReleaseUrl: (url: string) => Promise<void>
+  openReleasePage: () => Promise<void>
 }
 
 declare global {
