@@ -111,7 +111,7 @@ const zh = {
     sections: [
       {
         title: '1. 架构概览与进程隔离',
-        content: '本项目基于 <strong>Electron + React + TypeScript</strong> 构建：<br />&bull; <strong>主进程 (Main Process):</strong> 运行于 Node.js 环境，负责高权限的底层操作，如 <code>child_process.execFile</code>、<code>fs</code> 文件读写。<br />&bull; <strong>渲染进程 (Renderer):</strong> 独立沙盒化的 UI 视图环境。<br />&bull; <strong>安全通信 (Context Bridge):</strong> 所有跨进程调用均通过严格隔离的 <code>preload</code> 脚本进行 IPC 通信，从系统架构层面杜绝 XSS 到 RCE 的风险。'
+        content: '本项目基于 <strong>Electron + React + TypeScript</strong> 构建：<br />&bull; <strong>主进程 (Main Process):</strong> 运行于 Node.js 环境，负责高权限的底层操作，如 <code>child_process.execFile</code>、<code>fs</code> 文件读写。<br />&bull; <strong>渲染进程 (Renderer):</strong> 独立的 UI 视图进程，与主进程完全隔离。<br />&bull; <strong>安全通信 (Context Bridge):</strong> 所有跨进程调用均通过严格隔离的 <code>preload</code> 脚本进行 IPC 通信，从系统架构层面杜绝 XSS 到 RCE 的风险。'
       },
       {
         title: '2. 核心魔法：绕过单实例限制',
@@ -119,15 +119,15 @@ const zh = {
       },
       {
         title: '3. 毫秒级无感进程侦测',
-        content: '主进程通过高频轮询调用 <code>/bin/ps -eo command</code> 一次性获取全局进程表，在内存中比对各分身的物理可执行路径 (<code>CFBundleExecutable</code>)，精确判断分身是否运行。该设计彻底排除了应用名相似导致的假阳性误判，且 CPU 消耗趋近于零。'
+        content: '主进程在收到查询请求时调用 <code>/bin/ps -eo command</code> 一次性获取全局进程表，在内存中比对各分身的物理可执行路径 (<code>CFBundleExecutable</code>)，精确判断分身是否运行。该设计彻底排除了应用名相似导致的假阳性误判，且 CPU 开销为零。'
       },
       {
         title: '4. 极致的清理与无痕管理',
-        content: '卸载分身不仅是删除 <code>.app</code> 包，程序会深度追踪沙盒运作机制：除物理湮灭应用主体外，还会静默清除 <code>~/Library/Containers/[BundleID]</code> 以及 <code>~/Library/Group Containers/[BundleID]</code> 中关联的所有隔离存储数据区。实现随卡随用，随删无痕。'
+        content: '卸载分身不仅是删除 <code>.app</code> 包，程序会深度追踪沙盒运作机制：除物理湮灭应用主体外，还会静默清除 <code>~/Library/Containers/[BundleID]</code> 以及 <code>~/Library/Group Containers/[BundleID]</code> 中关联的所有隔离存储数据区。实现随装随用，随删无痕。'
       },
       {
-        title: '5. Frameless UI 原生执念',
-        content: '前端采用自绘的 <code>Frameless Window</code> 架构。通过定制可拖拽安全区 (<code>-webkit-app-region: drag</code>) 重拾系统级窗口拖拽。UI 阴影、毛玻璃与微动画 (<code>Keyframes</code>) 深度利用 GPU 硬件加速，纯 CSS 呈现顺滑的“超原生级”响应。'
+        title: '5. 隐式标题栏 UI 原生执念',
+        content: '前端采用 <code>titleBarStyle: hiddenInset</code> 架构，隐藏系统标题栏的同时保留原生红绿灯控件。通过定制可拖拽安全区 (<code>-webkit-app-region: drag</code>) 实现系统级窗口拖拽。UI 阴影、毛玻璃与微动画 (<code>Keyframes</code>) 深度利用 GPU 硬件加速，纯 CSS 呈现顺滑的“超原生级”响应。'
       }
     ]
   },

@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Delete existing release if any
         env:
@@ -50,9 +52,9 @@ jobs:
           PREV_TAG=$(git tag --sort=-v:refname | grep -v "^${TAG_NAME}$" | head -n 1)
           if [ -z "$PREV_TAG" ]; then
             # First release — use all commits
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD | grep -v "^- [0-9]\+\.[0-9]\+\.[0-9]\+ ")
           else
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..${TAG_NAME}")
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..${TAG_NAME}" | grep -v "^- [0-9]\+\.[0-9]\+\.[0-9]\+ ")
           fi
           # Build release body
           BODY=$(printf "## What's Changed\n\n%s\n\n**Full Changelog**: https://github.com/Gzbox/wechat-dual-launcher/compare/%s...%s" "$CHANGELOG" "$PREV_TAG" "$TAG_NAME")
