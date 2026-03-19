@@ -31,6 +31,19 @@ export function Dashboard(): React.JSX.Element {
       .catch(() => {})
   }, [])
 
+  // Reset "checking" state when any terminal updater event arrives
+  useEffect(() => {
+    const reset = (): void => setChecking(false)
+    const unsub1 = window.updaterApi.onAvailable(reset)
+    const unsub2 = window.updaterApi.onNotAvailable(reset)
+    const unsub3 = window.updaterApi.onError(reset)
+    return () => {
+      unsub1()
+      unsub2()
+      unsub3()
+    }
+  }, [])
+
   // Clamp selectedIndex when instances shrink (e.g. after delete)
   useEffect(() => {
     if (instances.length > 0 && selectedIndex >= instances.length) {
@@ -288,16 +301,10 @@ export function Dashboard(): React.JSX.Element {
             v{appVersion}
           </span>
           <button
-            onClick={async () => {
+            onClick={() => {
               if (checking) return
               setChecking(true)
-              try {
-                await window.updaterApi.check()
-              } catch {
-                // handled by UpdaterModal
-              } finally {
-                setTimeout(() => setChecking(false), 3000)
-              }
+              window.updaterApi.check()
             }}
             disabled={checking}
             style={{

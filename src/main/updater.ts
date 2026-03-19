@@ -27,23 +27,34 @@ export function setupUpdater(mainWindow: BrowserWindow): void {
   autoUpdater.autoInstallOnAppQuit = false
 
   autoUpdater.on('checking-for-update', () => {
+    console.log('[updater] checking-for-update')
     safeSend(mainWindow, 'updater:message', 'Checking for update...')
   })
 
   autoUpdater.on('update-available', (info) => {
+    console.log('[updater] update-available', info)
     safeSend(mainWindow, 'updater:available', info)
   })
 
   autoUpdater.on('update-not-available', (info) => {
+    console.log('[updater] update-not-available', info)
     safeSend(mainWindow, 'updater:not-available', info)
   })
 
   autoUpdater.on('error', (err) => {
+    console.error('[updater] error', err)
     safeSend(mainWindow, 'updater:error', err.message || err.toString())
   })
 
-  ipcMain.handle('updater:check', () => {
-    return autoUpdater.checkForUpdates()
+  ipcMain.handle('updater:check', async () => {
+    try {
+      return await autoUpdater.checkForUpdates()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[updater] checkForUpdates threw:', msg)
+      safeSend(mainWindow, 'updater:error', msg)
+      return undefined
+    }
   })
 
   // Open the GitHub Releases page in the user's default browser

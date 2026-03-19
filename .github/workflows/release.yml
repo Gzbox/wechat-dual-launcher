@@ -40,3 +40,21 @@ jobs:
           npm run typecheck
           npx electron-vite build
           npx electron-builder --mac -p always
+
+      - name: Generate changelog and update release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          # Find the previous tag
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v "^${TAG_NAME}$" | head -n 1)
+          if [ -z "$PREV_TAG" ]; then
+            # First release — use all commits
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..${TAG_NAME}")
+          fi
+          # Build release body
+          BODY=$(printf "## What's Changed\n\n%s\n\n**Full Changelog**: https://github.com/Gzbox/wechat-dual-launcher/compare/%s...%s" "$CHANGELOG" "$PREV_TAG" "$TAG_NAME")
+          # Update the release
+          gh release edit "$TAG_NAME" --notes "$BODY"
