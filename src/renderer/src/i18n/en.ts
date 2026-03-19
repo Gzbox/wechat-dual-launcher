@@ -155,7 +155,8 @@ const en: Locale = {
     browserHint:
       'Opens the download page in your browser. Download the new DMG and replace the app.',
     available: 'Available',
-    goDownload: 'Download'
+    goDownload: 'Download',
+    checkFailed: 'Check failed'
   }
 }
 

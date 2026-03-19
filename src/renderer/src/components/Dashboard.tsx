@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useWeChat } from '../hooks/useWeChat'
 import { useI18n } from '../i18n'
 import { WeChatIcon } from './WeChatIcon'
@@ -21,9 +21,11 @@ export function Dashboard(): React.JSX.Element {
   } | null>(null)
   const [showInfo, setShowInfo] = useState(false)
   const [appVersion, setAppVersion] = useState('')
-  const [checking, setChecking] = useState(false)
-  const [updateAvailable, setUpdateAvailable] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<
+    'idle' | 'checking' | 'up-to-date' | 'available' | 'error'
+  >('idle')
   const [newVersion, setNewVersion] = useState('')
+  const manualCheckRef = useRef(false)
 
   // Fetch app version on mount
   useEffect(() => {
@@ -36,19 +38,33 @@ export function Dashboard(): React.JSX.Element {
   // Updater: auto-check on mount, handle all IPC events inline
   useEffect(() => {
     const unsubTrigger = window.updaterApi.triggerCheck(() => {
+      manualCheckRef.current = false
       window.updaterApi.check()
     })
     const unsubAvail = window.updaterApi.onAvailable((info) => {
       const version = (info as { version?: string }).version || ''
       setNewVersion(version)
-      setUpdateAvailable(true)
-      setChecking(false)
+      setUpdateStatus('available')
     })
     const unsubNotAvail = window.updaterApi.onNotAvailable(() => {
-      setChecking(false)
+      if (manualCheckRef.current) {
+        // Manual check: show "up-to-date" feedback for 2.5s
+        setUpdateStatus('up-to-date')
+        setTimeout(() => setUpdateStatus('idle'), 2500)
+      } else {
+        // Auto check: stay silent
+        setUpdateStatus('idle')
+      }
+      manualCheckRef.current = false
     })
     const unsubErr = window.updaterApi.onError(() => {
-      setChecking(false)
+      if (manualCheckRef.current) {
+        setUpdateStatus('error')
+        setTimeout(() => setUpdateStatus('idle'), 2500)
+      } else {
+        setUpdateStatus('idle')
+      }
+      manualCheckRef.current = false
     })
     return () => {
       unsubTrigger()
@@ -315,38 +331,57 @@ export function Dashboard(): React.JSX.Element {
             >
               v{appVersion}
             </span>
-            {!updateAvailable && (
+            {updateStatus !== 'available' && (
               <button
                 onClick={() => {
-                  if (checking) return
-                  setChecking(true)
+                  if (updateStatus === 'checking') return
+                  manualCheckRef.current = true
+                  setUpdateStatus('checking')
                   window.updaterApi.check()
                 }}
-                disabled={checking}
+                disabled={updateStatus === 'checking'}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: checking ? 'var(--color-sidebar-text-dim)' : 'var(--color-green)',
+                  color:
+                    updateStatus === 'checking'
+                      ? 'var(--color-sidebar-text-dim)'
+                      : updateStatus === 'up-to-date'
+                        ? 'var(--color-green)'
+                        : updateStatus === 'error'
+                          ? 'var(--color-danger)'
+                          : 'var(--color-green)',
                   fontSize: 11,
-                  cursor: checking ? 'default' : 'pointer',
+                  cursor: updateStatus === 'checking' ? 'default' : 'pointer',
                   fontFamily: 'var(--font-body)',
                   fontWeight: 500,
                   padding: '2px 0',
-                  opacity: checking ? 0.6 : 0.8,
-                  transition: 'all 0.2s'
+                  opacity:
+                    updateStatus === 'checking'
+                      ? 0.6
+                      : updateStatus === 'up-to-date' || updateStatus === 'error'
+                        ? 1
+                        : 0.8,
+                  transition: 'all 0.3s'
                 }}
                 onMouseEnter={(e) => {
-                  if (!checking) e.currentTarget.style.opacity = '1'
+                  if (updateStatus === 'idle') e.currentTarget.style.opacity = '1'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = checking ? '0.6' : '0.8'
+                  if (updateStatus === 'idle') e.currentTarget.style.opacity = '0.8'
                 }}
               >
-                {checking ? t.updater.checking : t.updater.checkForUpdates}
+                {updateStatus === 'checking'
+                  ? t.updater.checking
+                  : updateStatus === 'up-to-date'
+                    ? `✓ ${t.updater.upToDate}`
+                    : updateStatus === 'error'
+                      ? t.updater.checkFailed
+                      : t.updater.checkForUpdates}
               </button>
             )}
           </div>
-          {updateAvailable && (
+          {updateStatus === 'available' && (
             <button
               onClick={() => window.updaterApi.openReleasePage()}
               style={{

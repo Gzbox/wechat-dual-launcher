@@ -142,7 +142,8 @@ const zh = {
     later: '稍后',
     browserHint: '将在浏览器中打开下载页面，下载新版 DMG 替换安装即可。',
     available: '可用',
-    goDownload: '前往下载'
+    goDownload: '前往下载',
+    checkFailed: '检查失败'
   }
 }
 
