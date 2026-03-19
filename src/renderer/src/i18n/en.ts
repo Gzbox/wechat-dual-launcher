@@ -153,7 +153,9 @@ const en: Locale = {
     downloadNow: 'Download Now',
     later: 'Later',
     browserHint:
-      'Opens the download page in your browser. Download the new DMG and replace the app.'
+      'Opens the download page in your browser. Download the new DMG and replace the app.',
+    available: 'Available',
+    goDownload: 'Download'
   }
 }
 

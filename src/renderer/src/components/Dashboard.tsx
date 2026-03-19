@@ -22,6 +22,8 @@ export function Dashboard(): React.JSX.Element {
   const [showInfo, setShowInfo] = useState(false)
   const [appVersion, setAppVersion] = useState('')
   const [checking, setChecking] = useState(false)
+  const [updateAvailable, setUpdateAvailable] = useState(false)
+  const [newVersion, setNewVersion] = useState('')
 
   // Fetch app version on mount
   useEffect(() => {
@@ -31,16 +33,28 @@ export function Dashboard(): React.JSX.Element {
       .catch(() => {})
   }, [])
 
-  // Reset "checking" state when any terminal updater event arrives
+  // Updater: auto-check on mount, handle all IPC events inline
   useEffect(() => {
-    const reset = (): void => setChecking(false)
-    const unsub1 = window.updaterApi.onAvailable(reset)
-    const unsub2 = window.updaterApi.onNotAvailable(reset)
-    const unsub3 = window.updaterApi.onError(reset)
+    const unsubTrigger = window.updaterApi.triggerCheck(() => {
+      window.updaterApi.check()
+    })
+    const unsubAvail = window.updaterApi.onAvailable((info) => {
+      const version = (info as { version?: string }).version || ''
+      setNewVersion(version)
+      setUpdateAvailable(true)
+      setChecking(false)
+    })
+    const unsubNotAvail = window.updaterApi.onNotAvailable(() => {
+      setChecking(false)
+    })
+    const unsubErr = window.updaterApi.onError(() => {
+      setChecking(false)
+    })
     return () => {
-      unsub1()
-      unsub2()
-      unsub3()
+      unsubTrigger()
+      unsubAvail()
+      unsubNotAvail()
+      unsubErr()
     }
   }, [])
 
@@ -286,48 +300,96 @@ export function Dashboard(): React.JSX.Element {
             padding: '12px 24px 20px',
             borderTop: '1px solid rgba(255,255,255,0.06)',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
+            flexDirection: 'column',
+            gap: 8
           }}
         >
-          <span
-            style={{
-              fontSize: 11,
-              color: 'var(--color-sidebar-text-dim)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.3px'
-            }}
-          >
-            v{appVersion}
-          </span>
-          <button
-            onClick={() => {
-              if (checking) return
-              setChecking(true)
-              window.updaterApi.check()
-            }}
-            disabled={checking}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: checking ? 'var(--color-sidebar-text-dim)' : 'var(--color-green)',
-              fontSize: 11,
-              cursor: checking ? 'default' : 'pointer',
-              fontFamily: 'var(--font-body)',
-              fontWeight: 500,
-              padding: '2px 0',
-              opacity: checking ? 0.6 : 0.8,
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (!checking) e.currentTarget.style.opacity = '1'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = checking ? '0.6' : '0.8'
-            }}
-          >
-            {checking ? t.updater.checking : t.updater.checkForUpdates}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: 'var(--color-sidebar-text-dim)',
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.3px'
+              }}
+            >
+              v{appVersion}
+            </span>
+            {!updateAvailable && (
+              <button
+                onClick={() => {
+                  if (checking) return
+                  setChecking(true)
+                  window.updaterApi.check()
+                }}
+                disabled={checking}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: checking ? 'var(--color-sidebar-text-dim)' : 'var(--color-green)',
+                  fontSize: 11,
+                  cursor: checking ? 'default' : 'pointer',
+                  fontFamily: 'var(--font-body)',
+                  fontWeight: 500,
+                  padding: '2px 0',
+                  opacity: checking ? 0.6 : 0.8,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!checking) e.currentTarget.style.opacity = '1'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = checking ? '0.6' : '0.8'
+                }}
+              >
+                {checking ? t.updater.checking : t.updater.checkForUpdates}
+              </button>
+            )}
+          </div>
+          {updateAvailable && (
+            <button
+              onClick={() => window.updaterApi.openReleasePage()}
+              style={{
+                background: 'rgba(74, 222, 128, 0.08)',
+                border: '1px solid rgba(74, 222, 128, 0.2)',
+                borderRadius: 8,
+                padding: '8px 12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(74, 222, 128, 0.14)'
+                e.currentTarget.style.borderColor = 'rgba(74, 222, 128, 0.35)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(74, 222, 128, 0.08)'
+                e.currentTarget.style.borderColor = 'rgba(74, 222, 128, 0.2)'
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: 'var(--color-green)',
+                  fontFamily: 'var(--font-body)'
+                }}
+              >
+                🎉 v{newVersion} {t.updater.available}
+              </span>
+              <span
+                style={{
+                  fontSize: 10,
+                  color: 'rgba(74, 222, 128, 0.7)',
+                  fontFamily: 'var(--font-body)'
+                }}
+              >
+                {t.updater.goDownload} →
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -826,7 +888,7 @@ export function Dashboard(): React.JSX.Element {
           justifyContent: 'center',
           fontSize: 11,
           color: 'var(--color-text-dim)',
-          opacity: 0.1,
+          opacity: 0.25,
           cursor: 'pointer',
           zIndex: 40,
           fontFamily: 'var(--font-mono)',
@@ -834,8 +896,8 @@ export function Dashboard(): React.JSX.Element {
           fontWeight: 600,
           borderRadius: '50%'
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.5')}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.1')}
+        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
+        onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.25')}
       >
         i
       </div>
