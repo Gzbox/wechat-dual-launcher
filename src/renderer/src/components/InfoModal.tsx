@@ -223,6 +223,34 @@ export function InfoModal({ open, onClose }: InfoModalProps): React.JSX.Element 
               <span dangerouslySetInnerHTML={{ __html: section.content }} />
             </Section>
           ))}
+
+          {/* GitHub Repo Link */}
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: 8,
+              paddingTop: 16,
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)'
+            }}
+          >
+            <a
+              href="https://github.com/Gzbox/wechat-dual-launcher"
+              target="_blank"
+              rel="noopener noreferrer"
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#4ade80')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}
+              style={{
+                color: 'rgba(255,255,255,0.3)',
+                fontSize: 11,
+                textDecoration: 'none',
+                letterSpacing: '0.3px',
+                transition: 'color 0.2s ease',
+                fontFamily: 'var(--font-mono)'
+              }}
+            >
+              ⭐ github.com/Gzbox/wechat-dual-launcher
+            </a>
+          </div>
         </div>
       </div>
     </div>
